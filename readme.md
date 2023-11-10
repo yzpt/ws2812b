@@ -209,3 +209,6 @@ I've started an implementation with Ableton via a Teensy 3.2
 https://github.com/yzpt/ws2812b/assets/140260395/b212ffa1-313d-4ec8-b21d-aad0c8c4dcfd
 
 
+## Course in PDF
+
+I had the opportunity to teach Arduino when I was a teacher, and some course examples are included in the [course_pdf](./cours_pdf/) folder.
