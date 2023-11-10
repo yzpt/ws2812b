@@ -200,10 +200,12 @@ void loop() {
 }
 ```
 
-## ws2812b + Teensy 3.2 + Ableton via Midi Serial US Bus
+## ws2812b + Teensy 3.2 + Ableton via Midi Serial USB Bus
 
 I've started an implementation with Ableton via a Teensy 3.2
 
+   ----- SOUND ON -----
+   
 https://github.com/yzpt/ws2812b/assets/140260395/b212ffa1-313d-4ec8-b21d-aad0c8c4dcfd
 
 
