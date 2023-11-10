@@ -69,12 +69,6 @@ float enveloppeGauss(float centre, float spread, float x) {
   return exp( -(x - centre) * (x - centre) / (spread));
 }
 
-void afficherObjet (int hue, int saturation, int centre, int spread) {
-  for (int i = 0; i < NUM_LEDS; i++) {
-    addLedHSV(i, hue, saturation, gauss(centre, spread, i));
-  }
-}
-
 void addLedHSV(int ledPosition, int hue, int saturation, int value) {
   leds[ledPosition] += CHSV(hue, saturation, value);
 }
