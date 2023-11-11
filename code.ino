@@ -6,18 +6,18 @@
 #define maxValue 159
 CRGB leds[NUM_LEDS];
 
-// nombre d'objets gaussiens max 
+// nombre d'objets (=motif) max 
 // pour une strip de 100 leds, nous
 // sommes à la limite de la mémoire
-// dynamqiue de l'arduino 
-// avec 6 objets gaussiens
+// dynamique de l'arduino nano
+// avec 6 objets 
 int nombreObjets = 6;
 int indexObjets = 0;
 
-// attirbuts des pseudo-objets gaussiens
+// attributs des pseudo-objets
 int objet_hue[6];
 int objet_sat[6];
-int objet_valeurs[6][106];
+int objet_valeurs[6][100];
 int objet_centre[6];
 int objet_spread[6];
 int objet_interval[6];
@@ -36,28 +36,32 @@ int index_palette_RB = 0;
 // durée un loop complet (3min30)
 int moduloLoopProg = 210;
 
+// gaussienne paramétrée
 float gauss(float centre, float spread, float x) {
   return round( maxValue * exp( -(x - centre) * (x - centre) / (spread)) );
 }
 
+// enveloppe gaussienne paramétrée
 float enveloppeGauss(float centre, float spread, float x) {
   return exp( -(x - centre) * (x - centre) / (spread));
 }
 
+// update du tableau à push en fin de loop
 void afficherObjet (int hue, int saturation, int centre, int spread) {
   for (int i = 0; i < NUM_LEDS; i++) {
     addLedHSV(i, hue, saturation, gauss(centre, spread, i));
   }
 }
 
+// addition du HSV lorsque plusieurs objets se superposent
 void addLedHSV(int ledPosition, int hue, int saturation, int value) {
   leds[ledPosition] += CHSV(hue, saturation, value);
 }
 
+
 void setLedHSV(int ledPosition, int hue, int saturation, int value) {
   leds[ledPosition] = CHSV(hue, saturation, value);
 }
-
 
 void calculerTableauValeurs (float centre, float spread, int indexTableau) {
   for (int i = 0; i < NUM_LEDS; i++) {
@@ -66,6 +70,7 @@ void calculerTableauValeurs (float centre, float spread, int indexTableau) {
   }
 }
 
+// création d'un objet gaussien, les paramètres d'entrées sont générés semi-aléatoirement en amont:
 void creerObjet(int hue, int sat, int centre, int spread, int interval, int sens, int enveloppe_centre, unsigned long enveloppe_spread) {
   objet_hue[indexObjets] = hue;
   objet_sat[indexObjets] = sat;
@@ -81,6 +86,7 @@ void creerObjet(int hue, int sat, int centre, int spread, int interval, int sens
   indexObjets = (indexObjets + 1) % nombreObjets;
 }
 
+// décalage du tableau de valeurs d'un objet (déplacement de l'objet)
 void shiftTableau(int indexObjets) {
   if (millis() - objet_prevRefresh[indexObjets] > objet_interval[indexObjets]) {
     objet_prevRefresh[indexObjets] = millis();
@@ -99,6 +105,7 @@ void shiftTableau(int indexObjets) {
     }
   }
 }
+
 
 void setObjet(int indexObjets) {
   float tempEnv = enveloppeGauss(objet_enveloppe_centre[indexObjets], objet_enveloppe_spread[indexObjets], millis() - objet_prevCreate[indexObjets]);
@@ -130,7 +137,11 @@ void loop() {
 
 // génération aléatoire d'objets gaussiens
 // ici selon 4 thèmes en boucle
+
+// paramètrage de la probabilité d'apparition d'un objet
   if (random16() < 375) {
+
+    // thème 1 : objets bleus, 30s
     if (bseconds16()%180 < 30) {
       creerObjet(   160,                            // hue
                     255,                            // sat
@@ -141,7 +152,8 @@ void loop() {
                     random(3000, 6000),             // enveloppe gauss centre
                     random(1000000, 5000000)        // enveloppe gauss spread
                 );
-      
+
+    // thème 2 : objets rouges ou bleus (selon la palette), 60s
     } else if (bseconds16()%180 < 90) {
       creerObjet(   palette_RB[index_palette_RB],   // hue
                     255,                            // sat
@@ -153,6 +165,9 @@ void loop() {
                     random(1000000, 5000000)        // enveloppe gauss spread
                 );
       index_palette_RB = (index_palette_RB + 1) % 2;
+
+    // thème 3 : objets de couleurs aléatoires situées entre le -hue- 224 (rose) et 287 = 32[255] = orange
+    // https://github.com/FastLED/FastLED/wiki/FastLED-HSV-Colors
     } else if (bseconds16()%180 < 120){
       creerObjet(   random(224,287)%255,            // hue
                     255,                            // sat
@@ -163,6 +178,8 @@ void loop() {
                     random(3000, 6000),             // enveloppe gauss centre
                     random(1000000, 5000000)        // enveloppe gauss spread
                 );
+    
+    // couleurs aléatoires sur l'entièreté du spectre
     } else if (bseconds16()%180 < 180){
       creerObjet(   random(255),                    // hue
                     255,                            // sat
